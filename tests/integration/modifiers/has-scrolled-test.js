@@ -1,12 +1,12 @@
-import { render, scrollTo } from "@ember/test-helpers";
-import { hbs } from "ember-cli-htmlbars";
-import { setupRenderingTest } from "ember-qunit";
-import { module, test } from "qunit";
+import { render, scrollTo } from '@ember/test-helpers';
+import { hbs } from 'ember-cli-htmlbars';
+import { setupRenderingTest } from 'ember-qunit';
+import { module, test } from 'qunit';
 
-module("Integration | Modifier | has-scrolled", function (hooks) {
+module('Integration | Modifier | has-scrolled', function (hooks) {
   setupRenderingTest(hooks);
 
-  test("react to vertical scrolling", async function (assert) {
+  test('react to vertical scrolling', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
@@ -16,12 +16,12 @@ module("Integration | Modifier | has-scrolled", function (hooks) {
         <div style="height: 20px">&nbsp;</div>
       </div>`);
 
-    await scrollTo("#scroll-container", 0, 100);
+    await scrollTo('#scroll-container', 0, 100);
 
-    assert.true(this.hasScrolled, "scrolling reflected in the variable");
+    assert.true(this.hasScrolled, 'scrolling reflected in the variable');
   });
 
-  test("react to horizontal scrolling", async function (assert) {
+  test('react to horizontal scrolling', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
@@ -31,12 +31,13 @@ module("Integration | Modifier | has-scrolled", function (hooks) {
         <div style="width: 20px">&nbsp;</div>
       </div>`);
 
-    await scrollTo("#scroll-container", 100, 0);
+    await scrollTo('#scroll-container', 100, 0);
 
-    assert.true(this.hasScrolled, "scrolling reflected in the variable");
+    assert.true(this.hasScrolled, 'scrolling reflected in the variable');
   });
 
-  test("react to scrolling container resize", async function (assert) {
+  test('react to scrolling container resize', async function (assert) {
+    assert.expect(1);
     const done = assert.async();
 
     await render(hbs`
@@ -49,15 +50,15 @@ module("Integration | Modifier | has-scrolled", function (hooks) {
         <div id="remove-me" style="height: 300px">&nbsp;</div>
       </div>`);
 
-    await scrollTo("#scroll-container", 0, 200);
+    await scrollTo('#scroll-container', 0, 200);
 
-    const elementToRemove = document.getElementById("remove-me");
+    const elementToRemove = document.getElementById('remove-me');
     elementToRemove.remove();
 
     setTimeout(() => {
       assert.false(
         this.hasScrolled,
-        "updates the variable when scrolling container is resized"
+        'updates the variable when scrolling container is resized'
       );
       done();
     }, 50);
