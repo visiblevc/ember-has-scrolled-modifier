@@ -1,3 +1,4 @@
+import { registerDestructor } from '@ember/destroyable';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Modifier from 'ember-modifier';
@@ -10,22 +11,32 @@ const DIRECTIONS = {
 export default class HasScrolledModifier extends Modifier {
   @service resizeObserver;
 
-  didInstall() {
-    this.element.addEventListener('scroll', this.handleScroll);
-    this.resizeObserver.observe(this.element, this.handleResize);
+  element;
+  property;
+  callback;
+
+  constructor(owner, args) {
+    super(owner, args);
+    registerDestructor(this, this.cleanup);
   }
 
-  willRemove() {
+  modify(element, [direction, callback]) {
+    this.element = element;
+    this.property = DIRECTIONS[direction];
+    this.callback = callback;
+
+    element.addEventListener('scroll', this.handleScroll);
+    this.resizeObserver.observe(element, this.handleResize);
+  }
+
+  cleanup = () => {
     this.element.removeEventListener('scroll', this.handleScroll);
     this.resizeObserver.unobserve(this.element, this.handleResize);
-  }
+  };
 
   @action
   handleScroll(event) {
-    const [direction, callback] = this.args.positional;
-    const property = DIRECTIONS[direction];
-
-    callback(event.target[property] > 0);
+    this.callback(event.target[this.property] > 0);
   }
 
   @action
