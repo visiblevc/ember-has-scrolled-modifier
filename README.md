@@ -26,13 +26,18 @@ Usage
 `has-scrolled` modifier accepts two positional arguments:
 
 - `direction`: tracks scroll direction. Possible values are 'vertical', 'horizontal'
-- `callback`: will be called when scroll event happened. A boolean argument will be passed which indicates if the element was scrolled in the specified direction.
+- `callback`: will be called when scroll event happened. A string argument will be passed which indicates how far the element was scrolled in the specified direction. Possible values are:
+
+  - `start`
+  - `middle`
+  - `end`
+  - `none` (when element isn't scrollable)
 
 
 Contributing
 ------------------------------------------------------------------------------
 
-See the [Contributing](CONTRIBUTING.md) guide for details.
+PRs are welcome.
 
 
 License

@@ -3,17 +3,27 @@ import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Modifier from 'ember-modifier';
 
-const DIRECTIONS = {
-  vertical: 'scrollTop',
-  horizontal: 'scrollLeft',
+const DIRECTION_TO_PROPERTY_NAMES = {
+  vertical: {
+    currentScroll: 'scrollTop',
+    scrollSize: 'scrollHeight',
+    clientSize: 'clientHeight',
+  },
+  horizontal: {
+    currentScroll: 'scrollLeft',
+    scrollSize: 'scrollWidth',
+    clientSize: 'clientWidth',
+  },
 };
+const SCROLL_EDGE = 0;
 
-export default class HasScrolledModifier extends Modifier {
+export default class ScrollPositionModifier extends Modifier {
   @service resizeObserver;
 
   element;
-  property;
   callback;
+  propertyNames;
+  scrollPosition;
 
   constructor(owner, args) {
     super(owner, args);
@@ -22,8 +32,8 @@ export default class HasScrolledModifier extends Modifier {
 
   modify(element, [direction, callback]) {
     this.element = element;
-    this.property = DIRECTIONS[direction];
     this.callback = callback;
+    this.propertyNames = DIRECTION_TO_PROPERTY_NAMES[direction];
 
     element.addEventListener('scroll', this.handleScroll);
     this.resizeObserver.observe(element, this.handleResize);
@@ -35,8 +45,13 @@ export default class HasScrolledModifier extends Modifier {
   };
 
   @action
-  handleScroll(event) {
-    this.callback(event.target[this.property] > 0);
+  handleScroll() {
+    const scrollPosition = this.#calculateScrollPosition();
+
+    if (scrollPosition !== this.scrollPosition) {
+      this.scrollPosition = scrollPosition;
+      this.callback(scrollPosition);
+    }
   }
 
   @action
@@ -46,5 +61,30 @@ export default class HasScrolledModifier extends Modifier {
     if (scrollableContainer) {
       scrollableContainer.dispatchEvent(new Event('scroll'));
     }
+  }
+
+  #calculateScrollPosition() {
+    const isAtScrollStart = this.#isAtScrollStart(this.element);
+    const isAtScrollEnd = this.#isAtScrollEnd(this.element);
+
+    if (isAtScrollStart && isAtScrollEnd) {
+      return 'none';
+    } else if (isAtScrollStart) {
+      return 'start';
+    } else if (isAtScrollEnd) {
+      return 'end';
+    } else {
+      return 'middle';
+    }
+  }
+
+  #isAtScrollStart(el) {
+    const { currentScroll } = this.propertyNames;
+    return el[currentScroll] <= SCROLL_EDGE;
+  }
+
+  #isAtScrollEnd(el) {
+    const { scrollSize, clientSize, currentScroll } = this.propertyNames;
+    return el[scrollSize] - el[clientSize] - el[currentScroll] <= SCROLL_EDGE;
   }
 }
