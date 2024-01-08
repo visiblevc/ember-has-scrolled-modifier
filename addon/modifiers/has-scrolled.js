@@ -64,23 +64,23 @@ export default class ScrollPositionModifier extends Modifier {
   }
 
   #calculateScrollPosition() {
-    const isAtScrollStart = this.#isAtScrollStart(this.element);
+    const hasScrolled = this.#hasScrolled(this.element);
     const isAtScrollEnd = this.#isAtScrollEnd(this.element);
+    let hasRemainingScroll = true;
 
-    if (isAtScrollStart && isAtScrollEnd) {
-      return 'none';
-    } else if (isAtScrollStart) {
-      return 'start';
-    } else if (isAtScrollEnd) {
-      return 'end';
-    } else {
-      return 'middle';
+    if ((!hasScrolled && isAtScrollEnd) || (hasScrolled && isAtScrollEnd)) {
+      hasRemainingScroll = false;
     }
+
+    return {
+      hasScrolled,
+      hasRemainingScroll,
+    };
   }
 
-  #isAtScrollStart(el) {
+  #hasScrolled(el) {
     const { currentScroll } = this.propertyNames;
-    return el[currentScroll] <= SCROLL_EDGE;
+    return el[currentScroll] > SCROLL_EDGE;
   }
 
   #isAtScrollEnd(el) {

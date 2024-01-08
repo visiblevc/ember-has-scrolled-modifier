@@ -6,7 +6,7 @@ import { module, test } from 'qunit';
 module('Integration | Modifier | has-scrolled', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('returns start when not scrolled', async function (assert) {
+  test('when not scrolled', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
@@ -16,10 +16,19 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
         <div style="height: 20px">&nbsp;</div>
       </div>`);
 
-    assert.equal(this.hasScrolled, 'start', 'scroll is at the start');
+    const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+
+    assert.false(
+      hasScrolled,
+      'hasScrolled is false when scroll is at the start'
+    );
+    assert.true(
+      hasRemainingScroll,
+      'hasRemainingScroll is true when scroll is at the start'
+    );
   });
 
-  test('returns middle when scrolled halfway', async function (assert) {
+  test('when scrolled halfway', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
@@ -31,10 +40,16 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
 
     await scrollTo('#scroll-container', 0, 5);
 
-    assert.equal(this.hasScrolled, 'middle', 'scroll is at the middle');
+    const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+
+    assert.true(hasScrolled, 'hasScrolled is true when scrolled halfway');
+    assert.true(
+      hasRemainingScroll,
+      'hasRemainingScroll is true when scrolled halfway'
+    );
   });
 
-  test('react to vertical scrolling', async function (assert) {
+  test('when scrolled to end vertically', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
@@ -46,14 +61,16 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
 
     await scrollTo('#scroll-container', 0, 10);
 
-    assert.equal(
-      this.hasScrolled,
-      'end',
-      'scrolling reflected in the variable'
+    const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+
+    assert.true(hasScrolled, 'hasScrolled is true when scrolled to end');
+    assert.false(
+      hasRemainingScroll,
+      'hasRemainingScroll is false when scrolled to end'
     );
   });
 
-  test('react to horizontal scrolling', async function (assert) {
+  test('when scrolled to end horizontally', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
@@ -65,15 +82,17 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
 
     await scrollTo('#scroll-container', 10, 0);
 
-    assert.equal(
-      this.hasScrolled,
-      'end',
-      'scrolling reflected in the variable'
+    const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+
+    assert.true(hasScrolled, 'hasScrolled is true when scrolled to end');
+    assert.false(
+      hasRemainingScroll,
+      'hasRemainingScroll is false when scrolled to end'
     );
   });
 
   test('react to scrolling container resize', async function (assert) {
-    assert.expect(1);
+    assert.expect(2);
     const done = assert.async();
 
     await render(hbs`
@@ -92,11 +111,14 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
     elementToRemove.remove();
 
     setTimeout(() => {
-      assert.equal(
-        this.hasScrolled,
-        'none',
-        'updates the variable when scrolling container is resized'
+      const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+
+      assert.false(hasScrolled, 'hasScrolled is false when there is no scroll');
+      assert.false(
+        hasRemainingScroll,
+        'hasRemainingScroll is false when there is no scroll'
       );
+
       done();
     }, 100);
   });
