@@ -6,81 +6,102 @@ import { module, test } from 'qunit';
 module('Integration | Modifier | has-scrolled', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('returns start when not scrolled', async function (assert) {
+  test('when not scrolled', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
         style="height: 10px; overflow-y: scroll;"
-        {{has-scrolled "vertical" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "vertical" (fn (mut this.scrollPosition))}}
       >
         <div style="height: 20px">&nbsp;</div>
       </div>`);
 
-    assert.equal(this.hasScrolled, 'start', 'scroll is at the start');
+    await scrollTo('#scroll-container', 0, 0);
+
+    const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
+
+    assert.false(
+      hasScrolled,
+      'hasScrolled is false when scroll is at the start'
+    );
+    assert.true(
+      hasRemainingScroll,
+      'hasRemainingScroll is true when scroll is at the start'
+    );
   });
 
-  test('returns middle when scrolled halfway', async function (assert) {
+  test('when scrolled halfway', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
         style="height: 10px; overflow-y: scroll;"
-        {{has-scrolled "vertical" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "vertical" (fn (mut this.scrollPosition))}}
       >
         <div style="height: 20px">&nbsp;</div>
       </div>`);
 
     await scrollTo('#scroll-container', 0, 5);
 
-    assert.equal(this.hasScrolled, 'middle', 'scroll is at the middle');
+    const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
+
+    assert.true(hasScrolled, 'hasScrolled is true when scrolled halfway');
+    assert.true(
+      hasRemainingScroll,
+      'hasRemainingScroll is true when scrolled halfway'
+    );
   });
 
-  test('react to vertical scrolling', async function (assert) {
+  test('when scrolled to end vertically', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
         style="height: 10px; overflow-y: scroll;"
-        {{has-scrolled "vertical" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "vertical" (fn (mut this.scrollPosition))}}
       >
         <div style="height: 20px">&nbsp;</div>
       </div>`);
 
     await scrollTo('#scroll-container', 0, 10);
 
-    assert.equal(
-      this.hasScrolled,
-      'end',
-      'scrolling reflected in the variable'
+    const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
+
+    assert.true(hasScrolled, 'hasScrolled is true when scrolled to end');
+    assert.false(
+      hasRemainingScroll,
+      'hasRemainingScroll is false when scrolled to end'
     );
   });
 
-  test('react to horizontal scrolling', async function (assert) {
+  test('when scrolled to end horizontally', async function (assert) {
     await render(hbs`
       <div
         id="scroll-container"
         style="width: 10px; overflow-x: scroll;"
-        {{has-scrolled "horizontal" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "horizontal" (fn (mut this.scrollPosition))}}
       >
         <div style="width: 20px">&nbsp;</div>
       </div>`);
 
     await scrollTo('#scroll-container', 10, 0);
 
-    assert.equal(
-      this.hasScrolled,
-      'end',
-      'scrolling reflected in the variable'
+    const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
+
+    assert.true(hasScrolled, 'hasScrolled is true when scrolled to end');
+    assert.false(
+      hasRemainingScroll,
+      'hasRemainingScroll is false when scrolled to end'
     );
   });
 
   test('react to scrolling container resize', async function (assert) {
-    assert.expect(1);
+    assert.expect(2);
     const done = assert.async();
 
     await render(hbs`
       <div
         id="scroll-container"
         style="height: 200px; overflow-y: scroll;"
-        {{has-scrolled "vertical" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "vertical" (fn (mut this.scrollPosition))}}
       >
         <div style="height: 100px">&nbsp;</div>
         <div id="remove-me" style="height: 300px">&nbsp;</div>
@@ -92,11 +113,14 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
     elementToRemove.remove();
 
     setTimeout(() => {
-      assert.equal(
-        this.hasScrolled,
-        'none',
-        'updates the variable when scrolling container is resized'
+      const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
+
+      assert.false(hasScrolled, 'hasScrolled is false when there is no scroll');
+      assert.false(
+        hasRemainingScroll,
+        'hasRemainingScroll is false when there is no scroll'
       );
+
       done();
     }, 100);
   });

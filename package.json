@@ -1,6 +1,6 @@
 {
   "name": "ember-has-scrolled-modifier",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Ember has-scrolled modifier",
   "keywords": [
     "ember-addon",

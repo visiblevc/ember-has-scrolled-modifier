@@ -48,7 +48,7 @@ export default class ScrollPositionModifier extends Modifier {
   handleScroll() {
     const scrollPosition = this.#calculateScrollPosition();
 
-    if (scrollPosition !== this.scrollPosition) {
+    if (this.#isScrollPositionChanged(scrollPosition)) {
       this.scrollPosition = scrollPosition;
       this.callback(scrollPosition);
     }
@@ -64,27 +64,36 @@ export default class ScrollPositionModifier extends Modifier {
   }
 
   #calculateScrollPosition() {
-    const isAtScrollStart = this.#isAtScrollStart(this.element);
+    const hasScrolled = this.#hasScrolled(this.element);
     const isAtScrollEnd = this.#isAtScrollEnd(this.element);
+    const hasRemainingScroll = !isAtScrollEnd;
 
-    if (isAtScrollStart && isAtScrollEnd) {
-      return 'none';
-    } else if (isAtScrollStart) {
-      return 'start';
-    } else if (isAtScrollEnd) {
-      return 'end';
-    } else {
-      return 'middle';
-    }
+    return {
+      hasScrolled,
+      hasRemainingScroll,
+    };
   }
 
-  #isAtScrollStart(el) {
+  #hasScrolled(el) {
     const { currentScroll } = this.propertyNames;
-    return el[currentScroll] <= SCROLL_EDGE;
+    return el[currentScroll] > SCROLL_EDGE;
   }
 
   #isAtScrollEnd(el) {
     const { scrollSize, clientSize, currentScroll } = this.propertyNames;
     return el[scrollSize] - el[clientSize] - el[currentScroll] <= SCROLL_EDGE;
+  }
+
+  #isScrollPositionChanged({ hasScrolled, hasRemainingScroll }) {
+    const { scrollPosition } = this;
+
+    if (!scrollPosition) {
+      return true;
+    }
+
+    return (
+      scrollPosition.hasScrolled !== hasScrolled ||
+      scrollPosition.hasRemainingScroll !== hasRemainingScroll
+    );
   }
 }
