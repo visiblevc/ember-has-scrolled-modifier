@@ -11,12 +11,14 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
       <div
         id="scroll-container"
         style="height: 10px; overflow-y: scroll;"
-        {{has-scrolled "vertical" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "vertical" (fn (mut this.scrollPosition))}}
       >
         <div style="height: 20px">&nbsp;</div>
       </div>`);
 
-    const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+    await scrollTo('#scroll-container', 0, 0);
+
+    const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
 
     assert.false(
       hasScrolled,
@@ -33,14 +35,14 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
       <div
         id="scroll-container"
         style="height: 10px; overflow-y: scroll;"
-        {{has-scrolled "vertical" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "vertical" (fn (mut this.scrollPosition))}}
       >
         <div style="height: 20px">&nbsp;</div>
       </div>`);
 
     await scrollTo('#scroll-container', 0, 5);
 
-    const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+    const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
 
     assert.true(hasScrolled, 'hasScrolled is true when scrolled halfway');
     assert.true(
@@ -54,14 +56,14 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
       <div
         id="scroll-container"
         style="height: 10px; overflow-y: scroll;"
-        {{has-scrolled "vertical" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "vertical" (fn (mut this.scrollPosition))}}
       >
         <div style="height: 20px">&nbsp;</div>
       </div>`);
 
     await scrollTo('#scroll-container', 0, 10);
 
-    const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+    const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
 
     assert.true(hasScrolled, 'hasScrolled is true when scrolled to end');
     assert.false(
@@ -75,14 +77,14 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
       <div
         id="scroll-container"
         style="width: 10px; overflow-x: scroll;"
-        {{has-scrolled "horizontal" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "horizontal" (fn (mut this.scrollPosition))}}
       >
         <div style="width: 20px">&nbsp;</div>
       </div>`);
 
     await scrollTo('#scroll-container', 10, 0);
 
-    const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+    const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
 
     assert.true(hasScrolled, 'hasScrolled is true when scrolled to end');
     assert.false(
@@ -99,7 +101,7 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
       <div
         id="scroll-container"
         style="height: 200px; overflow-y: scroll;"
-        {{has-scrolled "vertical" (fn (mut this.hasScrolled))}}
+        {{has-scrolled "vertical" (fn (mut this.scrollPosition))}}
       >
         <div style="height: 100px">&nbsp;</div>
         <div id="remove-me" style="height: 300px">&nbsp;</div>
@@ -111,7 +113,7 @@ module('Integration | Modifier | has-scrolled', function (hooks) {
     elementToRemove.remove();
 
     setTimeout(() => {
-      const { hasScrolled, hasRemainingScroll } = this.hasScrolled;
+      const { hasScrolled, hasRemainingScroll } = this.scrollPosition;
 
       assert.false(hasScrolled, 'hasScrolled is false when there is no scroll');
       assert.false(

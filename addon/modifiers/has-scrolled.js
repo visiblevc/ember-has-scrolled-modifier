@@ -48,7 +48,7 @@ export default class ScrollPositionModifier extends Modifier {
   handleScroll() {
     const scrollPosition = this.#calculateScrollPosition();
 
-    if (scrollPosition !== this.scrollPosition) {
+    if (this.#isScrollPositionChanged(scrollPosition)) {
       this.scrollPosition = scrollPosition;
       this.callback(scrollPosition);
     }
@@ -66,11 +66,7 @@ export default class ScrollPositionModifier extends Modifier {
   #calculateScrollPosition() {
     const hasScrolled = this.#hasScrolled(this.element);
     const isAtScrollEnd = this.#isAtScrollEnd(this.element);
-    let hasRemainingScroll = true;
-
-    if ((!hasScrolled && isAtScrollEnd) || (hasScrolled && isAtScrollEnd)) {
-      hasRemainingScroll = false;
-    }
+    const hasRemainingScroll = !isAtScrollEnd;
 
     return {
       hasScrolled,
@@ -86,5 +82,18 @@ export default class ScrollPositionModifier extends Modifier {
   #isAtScrollEnd(el) {
     const { scrollSize, clientSize, currentScroll } = this.propertyNames;
     return el[scrollSize] - el[clientSize] - el[currentScroll] <= SCROLL_EDGE;
+  }
+
+  #isScrollPositionChanged({ hasScrolled, hasRemainingScroll }) {
+    const { scrollPosition } = this;
+
+    if (!scrollPosition) {
+      return true;
+    }
+
+    return (
+      scrollPosition.hasScrolled !== hasScrolled ||
+      scrollPosition.hasRemainingScroll !== hasRemainingScroll
+    );
   }
 }
